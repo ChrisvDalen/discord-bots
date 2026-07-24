@@ -4,6 +4,8 @@ Node.js + discord.js bot, built in small patches per feature group.
 
 ## Setup
 
+Requires [ffmpeg](https://ffmpeg.org) on your `PATH` for music playback (`brew install ffmpeg` on macOS).
+
 ```bash
 npm install
 cp .env.example .env   # fill in DISCORD_TOKEN, DISCORD_CLIENT_ID, DISCORD_GUILD_ID
