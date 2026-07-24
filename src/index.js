@@ -3,6 +3,7 @@ import { readdirSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import path from "node:path";
 import { Client, Collection, GatewayIntentBits } from "discord.js";
+import { getPlayer } from "./player.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -11,6 +12,7 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+client.player = getPlayer(client);
 
 async function loadCommands() {
   const commandsDir = path.join(__dirname, "commands");
