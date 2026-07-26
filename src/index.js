@@ -1,43 +1,58 @@
 import "dotenv/config";
-import { readdirSync } from "node:fs";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import path from "node:path";
-import { Client, Collection, GatewayIntentBits } from "discord.js";
-import { getPlayer } from "./player.js";
+import { Client, Collection, GatewayIntentBits, MessageFlags } from "discord.js";
+import { loadCommands } from "./lib/loadCommands.js";
+import { createPlayer } from "./player.js";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+if (!process.env.DISCORD_TOKEN) {
+  console.error("DISCORD_TOKEN is not set (see .env.example).");
+  process.exit(1);
+}
+
+// Node terminates on an unhandled rejection by default, which would take the bot
+// down in every guild over a single failed API call.
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled promise rejection:", error);
+});
+
+process.on("uncaughtException", (error) => {
+  // Process state is undefined after this point, so exit and let a supervisor
+  // restart us rather than serving requests from a broken process.
+  console.error("Uncaught exception, shutting down:", error);
+  process.exit(1);
+});
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 });
 
 client.commands = new Collection();
-client.player = getPlayer(client);
 
-async function loadCommands() {
-  const commandsDir = path.join(__dirname, "commands");
-  const groups = readdirSync(commandsDir, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+async function respondWithError(interaction) {
+  const payload = {
+    content: "Er ging iets mis bij het uitvoeren van dit command.",
+    flags: MessageFlags.Ephemeral,
+  };
 
-  for (const group of groups) {
-    const groupDir = path.join(commandsDir, group.name);
-    const files = readdirSync(groupDir).filter((file) => file.endsWith(".js"));
-
-    for (const file of files) {
-      const filePath = path.join(groupDir, file);
-      const command = (await import(pathToFileURL(filePath).href)).default;
-
-      if (!command?.data || !command?.execute) {
-        console.warn(`Skipping ${filePath}: missing "data" or "execute" export.`);
-        continue;
-      }
-
-      client.commands.set(command.data.name, command);
+  try {
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(payload);
+    } else {
+      await interaction.reply(payload);
     }
+  } catch (error) {
+    // The interaction may have expired or been acknowledged elsewhere. There is
+    // no way left to reach the user, but this must not become a fatal rejection.
+    console.error("Could not deliver the error notice to the user:", error);
   }
 }
 
 client.once("clientReady", () => {
   console.log(`Logged in as ${client.user.tag}`);
+});
+
+// An unhandled "error" event on an EventEmitter is thrown, so this must be bound.
+client.on("error", (error) => {
+  console.error("Discord client error:", error);
 });
 
 client.on("interactionCreate", async (interaction) => {
@@ -50,14 +65,14 @@ client.on("interactionCreate", async (interaction) => {
     await command.execute(interaction);
   } catch (error) {
     console.error(`Error executing /${interaction.commandName}:`, error);
-    const payload = { content: "Er ging iets mis bij het uitvoeren van dit command.", ephemeral: true };
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp(payload);
-    } else {
-      await interaction.reply(payload);
-    }
+    await respondWithError(interaction);
   }
 });
 
-await loadCommands();
-client.login(process.env.DISCORD_TOKEN);
+client.player = await createPlayer(client);
+
+for (const command of await loadCommands()) {
+  client.commands.set(command.data.name, command);
+}
+
+await client.login(process.env.DISCORD_TOKEN);
