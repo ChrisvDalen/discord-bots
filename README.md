@@ -13,10 +13,24 @@ npm run deploy-commands # registers slash commands
 npm start
 ```
 
+`youtube-dl-exec` is a direct dependency because `discord-player-youtubei` imports it
+without declaring it — without it the bot fails to start at all. Its postinstall
+downloads a `yt-dlp` binary; on a restricted network use
+`npm install --ignore-scripts`, which still lets the bot boot and only gives up the
+yt-dlp fallback path.
+
+## Tests
+
+```bash
+npm test   # node --test, no framework
+```
+
 ## Structure
 
-- `src/index.js` — client bootstrap, dynamic command loader, interaction handler
+- `src/index.js` — client bootstrap, interaction handler, process-level error handling
 - `src/deploy-commands.js` — registers slash commands with Discord's API
+- `src/lib/loadCommands.js` — shared command loader used by both entry points
+- `src/lib/jsonStore.js` — atomic JSON persistence under `data/`
 - `src/commands/<group>/<command>.js` — each command exports `{ data, execute }`
 
 ## Patches
