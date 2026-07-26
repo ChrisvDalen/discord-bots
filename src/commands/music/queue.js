@@ -1,13 +1,13 @@
-import { SlashCommandBuilder } from "discord.js";
+import { InteractionContextType, MessageFlags, SlashCommandBuilder } from "discord.js";
 import { getActiveQueue } from "../../lib/musicQueue.js";
 
 export default {
-  data: new SlashCommandBuilder().setName("queue").setDescription("Toon de wachtrij"),
+  data: new SlashCommandBuilder().setName("queue").setDescription("Toon de wachtrij").setContexts(InteractionContextType.Guild),
 
   async execute(interaction) {
     const queue = getActiveQueue(interaction);
     if (!queue) {
-      return interaction.reply({ content: "Er is geen actieve wachtrij.", ephemeral: true });
+      return interaction.reply({ content: "Er is geen actieve wachtrij.", flags: MessageFlags.Ephemeral });
     }
 
     const upcoming = queue.tracks.toArray();

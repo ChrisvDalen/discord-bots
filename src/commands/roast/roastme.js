@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { setOptOut } from "../../lib/roastOptOutStore.js";
 
 export default {
@@ -21,6 +21,6 @@ export default {
       ? "🚫 Je bent uitgeschreven. Anderen kunnen `/roast` niet meer op jou gebruiken (jezelf roasten kan nog steeds)."
       : "✅ Je bent weer ingeschreven. Anderen kunnen je weer roasten met `/roast`.";
 
-    return interaction.reply({ content: message, ephemeral: true });
+    return interaction.reply({ content: message, flags: MessageFlags.Ephemeral });
   },
 };

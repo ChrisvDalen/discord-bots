@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { ROASTS } from "../../lib/roastData.js";
 import { isOptedOut } from "../../lib/roastOptOutStore.js";
 
@@ -15,7 +15,7 @@ export default {
     if (!isSelfRoast && isOptedOut(target.id)) {
       return interaction.reply({
         content: `${target} heeft zich uitgeschreven van roasts met \`/roastme\`. Respecteer dat 🙏`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 

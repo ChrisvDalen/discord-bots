@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import { checkIn } from "../../lib/streakStore.js";
 
 export default {
@@ -10,7 +10,7 @@ export default {
     if (alreadyCheckedInToday) {
       return interaction.reply({
         content: `📅 Je hebt vandaag al ingecheckt. Huidige streak: **${streak}** dag${streak === 1 ? "" : "en"}. Kom morgen terug!`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 
