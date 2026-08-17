@@ -4,10 +4,12 @@ Node.js + discord.js bot, built in small patches per feature group.
 
 ## Setup
 
+Requires Node.js 22 or 24. Node.js 18 and 20 are end-of-life and are no longer supported by this project.
+
 Requires [ffmpeg](https://ffmpeg.org) on your `PATH` for music playback (`brew install ffmpeg` on macOS).
 
 ```bash
-npm install
+npm ci
 cp .env.example .env   # fill in DISCORD_TOKEN, DISCORD_CLIENT_ID, DISCORD_GUILD_ID
 npm run deploy-commands # registers slash commands
 npm start
