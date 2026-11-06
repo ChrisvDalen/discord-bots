@@ -1,6 +1,6 @@
 {
   "name": "discord-bot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Discord bot with music, friendly, and roast commands.",
